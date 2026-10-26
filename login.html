@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contigo · Acceso</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;min-height:100vh;
+    background:linear-gradient(160deg,#e2f1ea,#eaf3ee);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:#fff;border-radius:28px;padding:32px 24px;width:100%;max-width:380px;
+    box-shadow:0 20px 60px rgba(31,111,99,.18)}
+  .logo{font-family:Georgia,serif;font-weight:900;font-size:28px;color:#1f6f63;
+    text-align:center;margin-bottom:4px}
+  .logo span{color:#ff7d6b}
+  .sub{text-align:center;color:#6f827e;font-size:14px;margin-bottom:24px}
+  .tabs{display:flex;background:#eef3f0;border-radius:14px;padding:4px;margin-bottom:20px}
+  .tab{flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:14px;
+    color:#6f827e;border:none;cursor:pointer;background:none;transition:.2s}
+  .tab.on{background:#fff;color:#1f6f63;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  input,select{width:100%;border:1.5px solid #e7ede9;border-radius:14px;
+    padding:13px 14px;font-size:15px;margin-bottom:12px;font-family:inherit;
+    background:#fff;color:#15282b}
+  input:focus,select:focus{outline:none;border-color:#2e9e8f}
+  .btn{width:100%;padding:16px;border-radius:18px;font-weight:700;font-size:16px;
+    border:none;cursor:pointer;font-family:inherit;margin-top:4px}
+  .btn-main{background:#2e9e8f;color:#fff;box-shadow:0 8px 20px rgba(46,158,143,.35)}
+  .btn-alt{background:#ff7d6b;color:#fff;box-shadow:0 8px 20px rgba(255,125,107,.35)}
+  .msg{margin-top:14px;padding:12px 14px;border-radius:14px;font-size:14px;
+    font-weight:600;text-align:center;display:none}
+  .msg.ok{background:#e2f5ec;color:#1d7a52;display:block}
+  .msg.err{background:#fde4df;color:#b23d28;display:block}
+  .panel{display:none}
+  .panel.on{display:block}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Contigo<span>.</span></div>
+  <div class="sub">Seguimiento bariátrico y GLP-1</div>
+
+  <div class="tabs">
+    <button class="tab on" onclick="setTab('login',this)">Entrar</button>
+    <button class="tab" onclick="setTab('signup',this)">Crear cuenta</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="panel on" id="pLogin">
+    <input type="email" id="lEmail" placeholder="Correo electrónico">
+    <input type="password" id="lPass" placeholder="Contraseña">
+    <button class="btn btn-main" onclick="doLogin()">Entrar</button>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="panel" id="pSignup">
+    <input type="text" id="sNombre" placeholder="Nombre completo">
+    <input type="email" id="sEmail" placeholder="Correo electrónico">
+    <input type="password" id="sPass" placeholder="Contraseña (mín. 6 caracteres)">
+    <select id="sRol">
+      <option value="paciente">Soy paciente</option>
+      <option value="doctora">Soy médico / médica</option>
+    </select>
+    <button class="btn btn-alt" onclick="doSignup()">Crear cuenta</button>
+  </div>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCzLVpRaRGXrb_yRURiD6tOq3heAXXZAIs",
+  authDomain: "contigo-61caa.firebaseapp.com",
+  projectId: "contigo-61caa",
+  storageBucket: "contigo-61caa.firebasestorage.app",
+  messagingSenderId: "1055534194040",
+  appId: "1:1055534194040:web:a2527927cdd6b0bafc3c8d",
+  measurementId: "G-WY20VTFCZT"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function setTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(tab === 'login' ? 'pLogin' : 'pSignup').classList.add('on');
+  document.getElementById('msg').className = 'msg';
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+async function doLogin() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass  = document.getElementById('lPass').value;
+  if (!email || !pass) return showMsg('Completa todos los campos', 'err');
+  showMsg('Entrando...', 'ok');
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    showMsg('¡Bienvenida! Redirigiendo...', 'ok');
+    setTimeout(() => {
+      window.location.href = 'contigo_final.html';
+    }, 800);
+  } catch (error) {
+    showMsg('Error: ' + error.message, 'err');
+  }
+}
+
+async function doSignup() {
+  const nombre = document.getElementById('sNombre').value.trim();
+  const email  = document.getElementById('sEmail').value.trim();
+  const pass   = document.getElementById('sPass').value;
+  const rol    = document.getElementById('sRol').value;
+  if (!nombre || !email || !pass) return showMsg('Completa todos los campos', 'err');
+  if (pass.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres', 'err');
+  showMsg('Creando cuenta...', 'ok');
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection('perfiles').doc(cred.user.uid).set({ nombre, rol, email });
+    showMsg('✅ Cuenta creada. Entrando...', 'ok');
+    setTimeout(() => {
+      window.location.href = 'contigo_final.html';
+    }, 800);
+  } catch (error) {
+    showMsg('Error: ' + error.message, 'err');
+  }
+}
+</script>
+</body>
+</html>
