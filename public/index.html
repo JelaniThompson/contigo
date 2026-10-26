@@ -3453,10 +3453,10 @@
 
       window.initApp = async function () {
         const user = auth.currentUser || await new Promise(res => { const unsub = auth.onAuthStateChanged(u => { unsub(); res(u); }); });
-        if (!user) { window.location.href = 'login.html'; return; }
+        if (!user) { window.location.href = '/login.html'; return; }
         window.currentUser = currentUser = user;
         const perfilSnap = await db.collection('perfiles').doc(user.uid).get();
-        if (!perfilSnap.exists) { window.location.href = 'login.html'; return; }
+        if (!perfilSnap.exists) { window.location.href = '/login.html'; return; }
         const perfil = perfilSnap.data();
         window.currentRol = currentRol = perfil.rol;
         const swPat = document.getElementById('sw-pat');

@@ -107,7 +107,7 @@ async function doLogin() {
     await auth.signInWithEmailAndPassword(email, pass);
     showMsg('¡Bienvenida! Redirigiendo...', 'ok');
     setTimeout(() => {
-      window.location.href = 'contigo_final.html';
+      window.location.href = '/';
     }, 800);
   } catch (error) {
     showMsg('Error: ' + error.message, 'err');
@@ -127,7 +127,7 @@ async function doSignup() {
     await db.collection('perfiles').doc(cred.user.uid).set({ nombre, rol, email });
     showMsg('✅ Cuenta creada. Entrando...', 'ok');
     setTimeout(() => {
-      window.location.href = 'contigo_final.html';
+      window.location.href = '/';
     }, 800);
   } catch (error) {
     showMsg('Error: ' + error.message, 'err');
